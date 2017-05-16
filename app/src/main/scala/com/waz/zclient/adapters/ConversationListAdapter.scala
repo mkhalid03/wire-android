@@ -30,6 +30,7 @@ import com.waz.service.ZMessaging
 import com.waz.threading.Threading
 import com.waz.utils.events.{EventContext, EventStream, Signal}
 import com.waz.zclient.adapters.ConversationListAdapter._
+import com.waz.zclient.controllers.TeamAndUsersController
 import com.waz.zclient.pages.main.conversationlist.views.ConversationCallback
 import com.waz.zclient.views.conversationlist.{IncomingConversationListRow, NormalConversationListRow}
 import com.waz.zclient.{Injectable, Injector, R}
@@ -39,14 +40,22 @@ class ConversationListAdapter(context: Context)(implicit injector: Injector, eve
   setHasStableIds(true)
 
   lazy val zms = inject[Signal[ZMessaging]]
+  lazy val teamAndUsersController = inject[TeamAndUsersController]
   val currentMode = Signal[ListMode]()
   lazy val conversations = for {
     z <- zms
     conversations <- z.convsStorage.convsSignal
     mode <- currentMode
+    teamOrUser <- teamAndUsersController.currentTeamOrUser
   } yield
     conversations.conversations
       .filter(mode.filter).toSeq
+      .filter{ conversationData => //TODO: STUB FILTER
+        teamOrUser match {
+          case Left(_) => conversationData.displayName.contains("a")
+          case _ => !conversationData.displayName.contains("a")
+        }
+      }
       .sortWith(mode.sort)
 
   lazy val incomingRequests = for {
@@ -54,7 +63,8 @@ class ConversationListAdapter(context: Context)(implicit injector: Injector, eve
     conversations <- z.convsStorage.convsSignal.map(_.conversations.filter(Incoming.filter).toSeq)
     members <- Signal.sequence(conversations.map(c => z.membersStorage.activeMembers(c.id).map(_.find(_ != z.selfUserId))):_*)
     mode <- currentMode
-  } yield if (mode == Normal) (conversations, members.flatten) else (Seq(), Seq())
+    teamOrUser <- teamAndUsersController.currentTeamOrUser
+  } yield if (mode == Normal && teamOrUser.isLeft) (conversations, members.flatten) else (Seq(), Seq())
 
   val onConversationClick = EventStream[ConversationData]()
   val onConversationLongClick = EventStream[ConversationData]()

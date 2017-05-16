@@ -64,6 +64,7 @@ abstract class ConversationListFragment extends BaseFragment[ConversationListFra
       override def onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) = {
         listActionsView.setScrolledToBottom(!recyclerView.canScrollVertically(1))
         topToolbar.setScrolledToTop(!recyclerView.canScrollVertically(-1))
+        topToolbar.setScrollingValue(recyclerView.computeVerticalScrollOffset())
       }
     })
 
@@ -249,8 +250,8 @@ class NormalConversationFragment extends ConversationListFragment {
 
 object ConversationListFragment {
   trait Container {
-    def showArchive()
-    def closeArchive()
+    def showArchive(): Unit
+    def closeArchive(): Unit
   }
 
   def newNormalInstance(): ConversationListFragment = {

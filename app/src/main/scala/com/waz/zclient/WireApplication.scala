@@ -121,6 +121,7 @@ object WireApplication {
     bind [LikesController]           to new LikesController()
     bind [CollectionController]      to new CollectionController()
     bind [SharingController]         to new SharingController()
+    bind [TeamAndUsersController]    to new TeamAndUsersController()
 
     /**
       * Since tracking controllers will immediately instantiate other necessary controllers, we keep them separated

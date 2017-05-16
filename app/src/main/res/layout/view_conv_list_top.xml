@@ -21,6 +21,7 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:app="http://schemas.android.com/apk/res-auto"
              >
+
     <com.waz.zclient.ui.text.TypefaceTextView
         android:id="@+id/conversation_list_title"
         android:layout_width="wrap_content"
@@ -30,6 +31,14 @@
         android:textSize="@dimen/wire__text_size__small"
         app:font="@string/wire__typeface__medium"
         android:textColor="@color/white"
+        />
+
+    <com.waz.zclient.views.TeamTabsView
+        android:id="@+id/team_tabs_container"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:layout_gravity="center"
         />
 
     <FrameLayout
