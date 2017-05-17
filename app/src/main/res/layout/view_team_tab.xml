@@ -18,11 +18,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:orientation="vertical"
-              android:layout_width="56dp"
-              android:layout_height="56dp">
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.waz.zclient.ui.views.CircleView
         android:id="@+id/unread_indicator"
@@ -48,8 +45,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="20dp"
         android:textSize="@dimen/wire__text_size__small"
-        android:text="Acme Inc."
         app:font="@string/wire__typeface__regular"
         android:textColor="@color/white"/>
 
-</FrameLayout>
+</merge>

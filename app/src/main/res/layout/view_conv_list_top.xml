@@ -39,6 +39,8 @@
         android:layout_height="match_parent"
         android:orientation="horizontal"
         android:layout_gravity="center"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         />
 
     <FrameLayout
@@ -74,8 +76,6 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/people_picker__border_line__height"
         android:layout_gravity="bottom"
-        android:background="@color/separator_dark"
-        android:visibility="gone"
         />
 
 </merge>

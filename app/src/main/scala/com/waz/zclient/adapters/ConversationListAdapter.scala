@@ -30,7 +30,7 @@ import com.waz.service.ZMessaging
 import com.waz.threading.Threading
 import com.waz.utils.events.{EventContext, EventStream, Signal}
 import com.waz.zclient.adapters.ConversationListAdapter._
-import com.waz.zclient.controllers.TeamAndUsersController
+import com.waz.zclient.controllers.TeamsAndUserController
 import com.waz.zclient.pages.main.conversationlist.views.ConversationCallback
 import com.waz.zclient.views.conversationlist.{IncomingConversationListRow, NormalConversationListRow}
 import com.waz.zclient.{Injectable, Injector, R}
@@ -40,7 +40,7 @@ class ConversationListAdapter(context: Context)(implicit injector: Injector, eve
   setHasStableIds(true)
 
   lazy val zms = inject[Signal[ZMessaging]]
-  lazy val teamAndUsersController = inject[TeamAndUsersController]
+  lazy val teamAndUsersController = inject[TeamsAndUserController]
   val currentMode = Signal[ListMode]()
   lazy val conversations = for {
     z <- zms
@@ -52,8 +52,8 @@ class ConversationListAdapter(context: Context)(implicit injector: Injector, eve
       .filter(mode.filter).toSeq
       .filter{ conversationData => //TODO: STUB FILTER
         teamOrUser match {
-          case Left(_) => conversationData.displayName.contains("a")
-          case _ => !conversationData.displayName.contains("a")
+          case Left(_) => !conversationData.displayName.contains("ω")
+          case _ => conversationData.displayName.contains("ω")
         }
       }
       .sortWith(mode.sort)

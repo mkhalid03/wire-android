@@ -20,11 +20,13 @@ package com.waz.zclient.views
 import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
-import android.view.View
+import android.view.{View, ViewGroup}
+import android.widget.FrameLayout.LayoutParams
 import android.widget.{FrameLayout, ImageView}
 import com.waz.api.impl.{AccentColor, AccentColors}
-import com.waz.model.{TeamData, UserData}
+import com.waz.model._
 import com.waz.utils.NameParts
+import com.waz.zclient.controllers.TeamData
 import com.waz.zclient.drawables.TeamIconDrawable
 import com.waz.zclient.ui.text.TypefaceTextView
 import com.waz.zclient.ui.views.CircleView
@@ -36,14 +38,13 @@ class TeamTabButton(val context: Context, val attrs: AttributeSet, val defStyleA
   def this(context: Context) = this(context, null)
 
   inflate(R.layout.view_team_tab)
+  setLayoutParams(new LayoutParams(context.getResources.getDimensionPixelSize(R.dimen.teams_tab_height), ViewGroup.LayoutParams.MATCH_PARENT))
 
   val icon = ViewUtils.getView(this, R.id.team_icon).asInstanceOf[ImageView]
   val name = ViewUtils.getView(this, R.id.team_name).asInstanceOf[TypefaceTextView]
   val unreadIndicator = ViewUtils.getView(this, R.id.unread_indicator).asInstanceOf[CircleView]
 
   val drawable = new TeamIconDrawable
-  drawable.setText("")
-  drawable.setBorderColor(Color.TRANSPARENT)
   icon.setImageDrawable(drawable)
   setLayerType(View.LAYER_TYPE_SOFTWARE, null)
 
@@ -52,6 +53,7 @@ class TeamTabButton(val context: Context, val attrs: AttributeSet, val defStyleA
     drawable.setInfo(NameParts.maybeInitial(teamData.name).getOrElse(""), color, TeamIconDrawable.TeamCorners)
     name.setText(teamData.name)
     unreadIndicator.setAccentColor(AccentColors.defaultColor.getColor())
+    drawable.assetId ! None
     setAlpha(if (selected) 1.0f else 0.5f)
   }
 
@@ -60,6 +62,7 @@ class TeamTabButton(val context: Context, val attrs: AttributeSet, val defStyleA
     drawable.setInfo(NameParts.maybeInitial(userData.displayName).getOrElse(""), color, TeamIconDrawable.UserCorners)
     name.setText(userData.displayName)
     unreadIndicator.setAccentColor(AccentColor(userData.accent).getColor())
+    drawable.assetId ! userData.picture
     setAlpha(if (selected) 1.0f else 0.5f)
   }
 

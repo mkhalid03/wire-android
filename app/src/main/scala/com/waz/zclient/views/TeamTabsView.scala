@@ -24,10 +24,10 @@ import android.view.View.OnClickListener
 import android.view.{View, ViewGroup}
 import com.waz.ZLog
 import com.waz.ZLog._
-import com.waz.model.{TeamData, UserData}
+import com.waz.model._
 import com.waz.threading.Threading
 import com.waz.utils.events.{EventContext, EventStream, Signal}
-import com.waz.zclient.controllers.TeamAndUsersController
+import com.waz.zclient.controllers.{TeamData, TeamsAndUserController}
 import com.waz.zclient.{Injectable, Injector, ViewHelper}
 
 class TeamTabsView(val context: Context, val attrs: AttributeSet, val defStyleAttr: Int) extends RecyclerView(context, attrs, defStyleAttr) with ViewHelper {
@@ -58,7 +58,7 @@ class TeamTabViewHolder(view: TeamTabButton) extends RecyclerView.ViewHolder(vie
 class TeamTabsAdapter(context: Context)(implicit injector: Injector, eventContext: EventContext) extends RecyclerView.Adapter[TeamTabViewHolder] with Injectable {
   private implicit val tag: LogTag = logTagFor[TeamTabsAdapter]
 
-  val controller = inject[TeamAndUsersController]
+  val controller = inject[TeamsAndUserController]
 
   val onItemClick = EventStream[Either[UserData, TeamData]]()
 

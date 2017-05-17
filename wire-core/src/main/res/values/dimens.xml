@@ -863,4 +863,6 @@
     <dimen name="conversation_list__badge__text_padding">8dp</dimen>
     <dimen name="conversation_list__badge__glyph_padding">10dp</dimen>
     <dimen name="conversation_list__avatar__stroke_width">0.5dp</dimen>
+
+    <dimen name="teams_tab_height">56dp</dimen>
 </resources>

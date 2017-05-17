@@ -19,14 +19,24 @@ package com.waz.zclient.drawables
 
 import android.graphics._
 import android.graphics.drawable.Drawable
-import TeamIconDrawable._
+import com.waz.ZLog
+import com.waz.model.AssetId
+import com.waz.service.ZMessaging
+import com.waz.service.assets.AssetService.BitmapResult.BitmapLoaded
+import com.waz.service.images.BitmapSignal
+import com.waz.ui.MemoryImageCache.BitmapRequest.Single
+import com.waz.utils.events.{EventContext, Signal}
+import com.waz.zclient.drawables.TeamIconDrawable._
+import com.waz.zclient.{Injectable, Injector}
 
 object TeamIconDrawable {
   val TeamCorners = 6
   val UserCorners = 0
 }
 
-class TeamIconDrawable extends Drawable {
+class TeamIconDrawable(implicit inj: Injector, eventContext: EventContext) extends Drawable with Injectable {
+  private implicit val tag = ZLog.logTagFor[TeamIconDrawable]
+
   var text = ""
   var corners = UserCorners
 
@@ -52,15 +62,46 @@ class TeamIconDrawable extends Drawable {
   textPaint.setColor(Color.TRANSPARENT)
   textPaint.setAntiAlias(true)
 
+  val bitmapPaint = new Paint(Paint.ANTI_ALIAS_FLAG)
+  bitmapPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN))
+
   val innerPath = new Path()
   val borderPath = new Path()
+  val matrix = new Matrix()
+
+  val assetId = Signal(Option.empty[AssetId])
+  val bounds = Signal(getBounds)
+  val zms = inject[Signal[ZMessaging]]
+  val bmp = for{
+    z <- zms
+    Some(assetId) <- assetId
+    asset <- z.assetsStorage.signal(assetId)
+    b <- bounds
+    bmp <- BitmapSignal(asset, Single(b.width), z.imageLoader, z.assetsStorage.get)
+  } yield bmp
 
   override def draw(canvas: Canvas) = {
     canvas.drawPath(innerPath, innerPaint)
+    bmp.currentValue match {
+      case Some(BitmapLoaded(bitmap, _)) =>
+        matrix.reset()
+        computeMatrix(bitmap.getWidth, bitmap.getHeight, getBounds, matrix)
+        canvas.drawBitmap(bitmap, matrix, bitmapPaint)
+      case _ =>
+        val textY = getBounds.centerY - ((textPaint.descent + textPaint.ascent) / 2f)
+        val textX = getBounds.centerX
+        canvas.drawText(text, textX, textY, textPaint)
+    }
     canvas.drawPath(borderPath, borderPaint)
-    val textY = getBounds.centerY - ((textPaint.descent + textPaint.ascent) / 2f)
-    val textX = getBounds.centerX
-    canvas.drawText(text, textX, textY, textPaint)
+  }
+
+  def computeMatrix(bmWidth: Int, bmHeight: Int, bounds: Rect, matrix: Matrix): Unit = {
+    val scale = math.max(bounds.width.toFloat / bmWidth.toFloat, bounds.height.toFloat / bmHeight.toFloat)
+    val dx = - (bmWidth * scale - bounds.width) / 2
+    val dy = - (bmHeight * scale - bounds.height) / 2
+
+    matrix.setScale(scale, scale)
+    matrix.postTranslate(dx, dy)
   }
 
   override def setColorFilter(colorFilter: ColorFilter) = {
@@ -114,6 +155,7 @@ class TeamIconDrawable extends Drawable {
     hexMatrix.setTranslate(bounds.centerX(), bounds.centerY())
     borderPath.transform(hexMatrix)
     innerPath.transform(hexMatrix)
+    this.bounds ! bounds
   }
 
   override def getIntrinsicHeight = super.getIntrinsicHeight
@@ -125,21 +167,6 @@ class TeamIconDrawable extends Drawable {
   def setInfo(text: String, borderColor:Int, corners: Int): Unit = {
     this.text = text
     borderPaint.setColor(borderColor)
-    this.corners = corners
-    invalidateSelf()
-  }
-
-  def setText(text:String): Unit = {
-    this.text = text
-    invalidateSelf()
-  }
-
-  def setBorderColor(color: Int): Unit ={
-    borderPaint.setColor(color)
-    invalidateSelf()
-  }
-
-  def setCorners(corners: Int): Unit = {
     this.corners = corners
     invalidateSelf()
   }

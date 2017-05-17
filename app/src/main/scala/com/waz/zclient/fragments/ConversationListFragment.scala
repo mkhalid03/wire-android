@@ -30,6 +30,7 @@ import com.waz.service.ZMessaging
 import com.waz.threading.Threading
 import com.waz.utils.events.Signal
 import com.waz.zclient.adapters.ConversationListAdapter
+import com.waz.zclient.controllers.TeamsAndUserController
 import com.waz.zclient.controllers.global.AccentColorController
 import com.waz.zclient.controllers.tracking.events.navigation.OpenedContactsEvent
 import com.waz.zclient.core.stores.conversation.ConversationChangeRequester
@@ -56,15 +57,21 @@ abstract class ConversationListFragment extends BaseFragment[ConversationListFra
     val topToolbar = ViewUtils.getView(view, R.id.conversation_list_top_toolbar).asInstanceOf[ConversationListTopToolbar]
     val listActionsView = ViewUtils.getView(view, R.id.lav__conversation_list_actions).asInstanceOf[ListActionsView]
 
+    val teamsAndUsersController = inject[TeamsAndUserController]
+
     conversationListView.setLayoutManager(new LinearLayoutManager(getContext))
     conversationListView.setAdapter(adapter)
     conversationListView.setAllowSwipeAway(true)
+    conversationListView.setOverScrollMode(View.OVER_SCROLL_NEVER)
+
+    teamsAndUsersController.currentTeamOrUser.on(Threading.Ui) { _ =>
+      conversationListView.scrollToPosition(0)
+    }
 
     conversationListView.addOnScrollListener(new RecyclerView.OnScrollListener {
       override def onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) = {
         listActionsView.setScrolledToBottom(!recyclerView.canScrollVertically(1))
         topToolbar.setScrolledToTop(!recyclerView.canScrollVertically(-1))
-        topToolbar.setScrollingValue(recyclerView.computeVerticalScrollOffset())
       }
     })
 
